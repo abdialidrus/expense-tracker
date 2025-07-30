@@ -21,8 +21,6 @@ export default function Home() {
           <ExpenseList onDataChange={handleDataChange} />
         </div>
       </main>
-
-      {/* <Footer /> */}
     </div>
   );
 }

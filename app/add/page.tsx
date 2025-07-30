@@ -19,8 +19,6 @@ export default function AddExpensePage() {
           <ExpenseForm />
         </div>
       </main>
-
-      {/* <Footer /> */}
     </div>
   );
 }

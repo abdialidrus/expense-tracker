@@ -1,15 +1,20 @@
+"use client";
+
 import ExpenseForm from "@/components/expense-form";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
-interface EditExpensePageProps {
-  params: {
-    id: string;
-  };
-}
+export default function EditExpensePage() {
+  const params = useParams();
+  const id =
+    typeof params.id === "string"
+      ? params.id
+      : Array.isArray(params.id)
+      ? params.id[0]
+      : "";
 
-export default function EditExpensePage({ params }: EditExpensePageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 dark:text-gray-100">
       <Header />
@@ -22,11 +27,9 @@ export default function EditExpensePage({ params }: EditExpensePageProps) {
               <Button variant="outline">Back to List</Button>
             </Link>
           </div>
-          <ExpenseForm expenseId={parseInt(params.id)} />
+          <ExpenseForm expenseId={parseInt(id)} />
         </div>
       </main>
-
-      {/* <Footer /> */}
     </div>
   );
 }
