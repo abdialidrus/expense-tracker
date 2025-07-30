@@ -3,6 +3,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,7 +27,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
 import { Expense } from "@/types";
-import { Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { Filter, Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -141,6 +148,18 @@ export default function ExpenseList({
     }
   };
 
+  // Function to render sort indicator
+  const renderSortIndicator = (column: string) => {
+    if (sortBy === column) {
+      return (
+        <span className="ml-1 inline-flex items-center">
+          {sortOrder === "asc" ? "↑" : "↓"}
+        </span>
+      );
+    }
+    return null;
+  };
+
   // Function to render mobile cards for small screens
   const renderMobileCards = () => {
     return expenses.map((expense) => (
@@ -214,83 +233,114 @@ export default function ExpenseList({
       <CardContent className="p-4">
         <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
-            <label htmlFor="category-filter" className="text-sm font-medium">
-              Filter by:
-            </label>
-            <select
-              id="category-filter"
-              value={categoryFilter}
-              onChange={(e) =>
-                setCategoryFilter(e.target.value as CategoryFilterType)
-              }
-              className="border rounded p-1 dark:bg-gray-800 dark:border-gray-700"
-            >
-              <option value="all">All</option>
-              <option value="income">Credit</option>
-              <option value="outcome">Debit</option>
-            </select>
+            <div className="flex items-center gap-3">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium">Filter:</span>
+
+              <Select
+                value={categoryFilter}
+                onValueChange={(value) =>
+                  setCategoryFilter(value as CategoryFilterType)
+                }
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="income">
+                    <div className="flex items-center">
+                      <TrendingUp className="mr-2 h-4 w-4 text-green-600" />
+                      <span>Credit</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="outcome">
+                    <div className="flex items-center">
+                      <TrendingDown className="mr-2 h-4 w-4 text-red-600" />
+                      <span>Debit</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-4">Loading...</div>
+          <div className="flex justify-center items-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          </div>
         ) : expenses.length === 0 ? (
-          <div className="text-center py-4">
-            No expenses found. Add some expenses to get started!
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+            <p>No expenses found.</p>
+            {user && <p className="mt-1">Add some expenses to get started!</p>}
           </div>
         ) : (
           <>
             {/* Desktop view (hidden on small screens) */}
-            <div className="rounded-md border dark:border-gray-700 hidden md:block">
+            <div className="rounded-md border dark:border-gray-700 hidden md:block overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="hover:bg-gray-100 dark:hover:bg-gray-800">
                     <TableHead
-                      className="cursor-pointer"
+                      className="cursor-pointer font-medium px-6 py-3"
                       onClick={() => handleSort("date")}
                     >
-                      Date{" "}
-                      {sortBy === "date" && (sortOrder === "asc" ? "↑" : "↓")}
+                      <div className="flex items-center">
+                        Date
+                        {renderSortIndicator("date")}
+                      </div>
                     </TableHead>
                     <TableHead
-                      className="cursor-pointer"
+                      className="cursor-pointer font-medium px-6 py-3"
                       onClick={() => handleSort("description")}
                     >
-                      Description{" "}
-                      {sortBy === "description" &&
-                        (sortOrder === "asc" ? "↑" : "↓")}
+                      <div className="flex items-center">
+                        Description
+                        {renderSortIndicator("description")}
+                      </div>
                     </TableHead>
                     <TableHead
-                      className="cursor-pointer"
+                      className="cursor-pointer font-medium px-6 py-3"
                       onClick={() => handleSort("category")}
                     >
-                      Category{" "}
-                      {sortBy === "category" &&
-                        (sortOrder === "asc" ? "↑" : "↓")}
+                      <div className="flex items-center">
+                        Category
+                        {renderSortIndicator("category")}
+                      </div>
                     </TableHead>
                     <TableHead
-                      className="cursor-pointer text-right"
+                      className="cursor-pointer text-right font-medium px-6 py-3"
                       onClick={() => handleSort("amount")}
                     >
-                      Amount{" "}
-                      {sortBy === "amount" && (sortOrder === "asc" ? "↑" : "↓")}
+                      <div className="flex items-center justify-end">
+                        Amount
+                        {renderSortIndicator("amount")}
+                      </div>
                     </TableHead>
                     {user && (
-                      <TableHead className="w-[100px]">Actions</TableHead>
+                      <TableHead className="w-[120px] text-center font-medium px-6 py-3">
+                        Actions
+                      </TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {expenses.map((expense) => (
-                    <TableRow key={expense.id}>
-                      <TableCell>
+                    <TableRow
+                      key={expense.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <TableCell className="font-medium px-6 py-4">
                         {new Date(expense.date).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{expense.description}</TableCell>
-                      <TableCell>
+                      <TableCell className="px-6 py-4">
+                        {expense.description}
+                      </TableCell>
+                      <TableCell className="px-6 py-4">
                         {renderCategoryBadge(expense.category)}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right font-medium px-6 py-4">
                         <span
                           className={
                             expense.category === "income"
@@ -302,12 +352,17 @@ export default function ExpenseList({
                         </span>
                       </TableCell>
                       {user && (
-                        <TableCell>
+                        <TableCell className="px-6 py-4">
                           <div className="flex gap-2 justify-center">
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="outline" size="icon" asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    asChild
+                                    className="h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                  >
                                     <Link href={`/edit/${expense.id}`}>
                                       <Pencil className="h-4 w-4" />
                                       <span className="sr-only">Edit</span>
@@ -324,9 +379,10 @@ export default function ExpenseList({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant="destructive"
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => handleDelete(expense.id)}
+                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     <span className="sr-only">Delete</span>
@@ -349,28 +405,31 @@ export default function ExpenseList({
             {/* Mobile view (visible only on small screens) */}
             <div className="md:hidden">{renderMobileCards()}</div>
 
-            <div className="flex items-center justify-center space-x-2 py-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-              <span>
+            {/* Pagination */}
+            <div className="flex items-center justify-between space-x-2 py-4 mt-2">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </>
         )}
