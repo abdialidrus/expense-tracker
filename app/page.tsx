@@ -1,7 +1,6 @@
 "use client";
 
 import ExpenseList from "@/components/expense-list";
-import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { useCallback, useState } from "react";
 
@@ -23,7 +22,7 @@ export default function Home() {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

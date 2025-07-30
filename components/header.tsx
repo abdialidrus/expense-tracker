@@ -1,6 +1,7 @@
+"use client";
+
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import BalanceSummary from "./balance-summary";
@@ -32,24 +33,14 @@ export function Header() {
           <div className="flex items-center gap-2">
             <BalanceSummary />
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <div className="flex flex-col gap-4 mt-8">
-                  <Link href="/add">
-                    <Button className="w-full">Add Expense</Button>
-                  </Link>
-                  <div className="flex justify-center mt-2">
-                    <ThemeToggle />
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <Button variant="outline" size="icon" asChild>
+              <Link href="/add">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Add expense</span>
+              </Link>
+            </Button>
+
+            <ThemeToggle />
           </div>
         </div>
       </div>

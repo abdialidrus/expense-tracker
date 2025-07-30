@@ -3,11 +3,13 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function EditExpensePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface EditExpensePageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function EditExpensePage({ params }: EditExpensePageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 dark:text-gray-100">
       <Header />
