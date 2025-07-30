@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -12,6 +13,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -19,18 +25,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+// Fixed schema with proper Zod date validation
 const formSchema = z.object({
-  date: z.string().nonempty("Date is required"),
+  // Fixed: Using z.date() without invalid arguments
+  date: z.date().refine((date) => date instanceof Date, {
+    message: "Please select a date",
+  }),
   description: z.string().nonempty("Description is required"),
   category: z.enum(["income", "outcome"]),
-  amount: z.number().positive("Amount must be positive"),
+  amount: z.number().min(0, "Amount must be positive"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,14 +53,17 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
   const router = useRouter();
   const isEditing = !!expenseId;
 
+  // Default form values
+  const defaultValues: Partial<FormValues> = {
+    date: new Date(),
+    description: "",
+    category: "outcome",
+    amount: 0,
+  };
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      date: new Date().toISOString().split("T")[0],
-      description: "",
-      category: "outcome",
-      amount: 0,
-    },
+    defaultValues,
   });
 
   // Create fetchExpense as a useCallback to use it in dependencies
@@ -63,8 +79,11 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
 
       if (error) throw error;
 
+      // Parse the date string to a Date object for the form
+      const expenseDate = new Date(data.date);
+
       form.reset({
-        date: new Date(data.date).toISOString().split("T")[0],
+        date: expenseDate,
         description: data.description,
         category: data.category,
         amount: data.amount,
@@ -84,17 +103,25 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
     try {
+      // Format date to ISO string for database
+      const formattedValues = {
+        ...values,
+        date: values.date.toISOString().split("T")[0],
+      };
+
       if (isEditing) {
         // Update existing expense
         const { error } = await supabase
           .from("expenses")
-          .update(values)
+          .update(formattedValues)
           .eq("id", expenseId);
 
         if (error) throw error;
       } else {
         // Create new expense
-        const { error } = await supabase.from("expenses").insert([values]);
+        const { error } = await supabase
+          .from("expenses")
+          .insert([formattedValues]);
 
         if (error) throw error;
       }
@@ -108,13 +135,18 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
     }
   };
 
-  // Convert string to number when amount input changes
-  const handleAmountChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (value: number) => void
-  ) => {
-    const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
-    onChange(value);
+  // Format amount to display with commas for thousands
+  const formatAmount = (value: number) => {
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  };
+
+  // Parse formatted string back to number
+  const parseAmount = (value: string) => {
+    // Remove all non-numeric characters except decimal point
+    return parseFloat(value.replace(/[^0-9.]/g, "")) || 0;
   };
 
   return (
@@ -129,15 +161,36 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      {...field}
-                      className="dark:bg-gray-800 dark:border-gray-700"
-                    />
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
@@ -170,6 +223,7 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="dark:bg-gray-800 dark:border-gray-700">
@@ -203,15 +257,23 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter amount"
-                      value={field.value}
-                      onChange={(e) => handleAmountChange(e, field.onChange)}
-                      onBlur={field.onBlur}
-                      className="dark:bg-gray-800 dark:border-gray-700"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        Rp
+                      </span>
+                      <Input
+                        type="text"
+                        placeholder="0"
+                        value={
+                          field.value === 0 ? "" : formatAmount(field.value)
+                        }
+                        onChange={(e) => {
+                          const value = parseAmount(e.target.value);
+                          field.onChange(value);
+                        }}
+                        className="pl-10 dark:bg-gray-800 dark:border-gray-700 text-right"
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

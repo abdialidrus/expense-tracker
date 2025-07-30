@@ -2,7 +2,6 @@
 
 import AuthGuard from "@/components/auth-guard";
 import ExpenseForm from "@/components/expense-form";
-import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -33,8 +32,6 @@ export default function EditExpensePage() {
             <ExpenseForm expenseId={parseInt(id)} />
           </div>
         </main>
-
-        <Footer />
       </div>
     </AuthGuard>
   );

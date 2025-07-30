@@ -1,6 +1,5 @@
 "use client";
 
-import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import LoginForm from "@/components/login-form";
 import { useAuth } from "@/lib/auth-context";
@@ -30,8 +29,6 @@ export default function LoginPage() {
           <LoginForm />
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

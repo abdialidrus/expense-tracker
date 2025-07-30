@@ -2,11 +2,15 @@
 
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
-import { Wallet } from "lucide-react";
+import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function BalanceSummary() {
-  const [balance, setBalance] = useState<number>(0);
+  const [summary, setSummary] = useState({
+    totalIncome: 0,
+    totalOutcome: 0,
+    balance: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +25,11 @@ export default function BalanceSummary() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        setBalance(data[0].net_amount);
+        setSummary({
+          totalIncome: data[0].total_income,
+          totalOutcome: data[0].total_outcome,
+          balance: data[0].net_amount,
+        });
       }
     } catch (error) {
       console.error("Error fetching summary:", error);
@@ -31,25 +39,62 @@ export default function BalanceSummary() {
   };
 
   return (
-    <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 border border-gray-200 dark:border-gray-700">
-      <Wallet className="h-6 w-6 mr-3 text-gray-600 dark:text-gray-300" />
-      <div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Current Balance
-        </div>
-        {loading ? (
-          <div className="h-6 w-28 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
-        ) : (
-          <div
-            className={`text-xl font-bold ${
-              balance >= 0
-                ? "text-green-600 dark:text-green-400"
-                : "text-red-600 dark:text-red-400"
-            }`}
-          >
-            {formatCurrency(balance)}
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+      {/* Income Card */}
+      <div className="flex items-center bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+        <TrendingUp className="h-8 w-8 mr-4 text-green-600 dark:text-green-400" />
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Total Income
           </div>
-        )}
+          {loading ? (
+            <div className="h-6 w-28 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mt-1"></div>
+          ) : (
+            <div className="text-xl font-bold text-green-600 dark:text-green-400">
+              {formatCurrency(summary.totalIncome)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Outcome Card */}
+      <div className="flex items-center bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+        <TrendingDown className="h-8 w-8 mr-4 text-red-600 dark:text-red-400" />
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Total Expenses
+          </div>
+          {loading ? (
+            <div className="h-6 w-28 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mt-1"></div>
+          ) : (
+            <div className="text-xl font-bold text-red-600 dark:text-red-400">
+              {formatCurrency(summary.totalOutcome)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Balance Card */}
+      <div className="flex items-center bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+        <Wallet className="h-8 w-8 mr-4 text-blue-600 dark:text-blue-400" />
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Current Balance
+          </div>
+          {loading ? (
+            <div className="h-6 w-28 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mt-1"></div>
+          ) : (
+            <div
+              className={`text-xl font-bold ${
+                summary.balance >= 0
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-red-600 dark:text-red-400"
+              }`}
+            >
+              {formatCurrency(summary.balance)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

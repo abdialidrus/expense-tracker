@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -109,21 +110,27 @@ export default function ExpenseList({
     }
   };
 
-  // Function to render category icon
-  const renderCategoryIcon = (category: "income" | "outcome") => {
+  // Function to render category badge
+  const renderCategoryBadge = (category: "income" | "outcome") => {
     if (category === "income") {
       return (
-        <div className="flex items-center text-green-600 dark:text-green-400">
-          <TrendingUp className="mr-1 h-4 w-4" />
-          <span className="sr-only md:not-sr-only">Income</span>
-        </div>
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800 flex items-center gap-1"
+        >
+          <TrendingUp className="h-3 w-3" />
+          <span>Income</span>
+        </Badge>
       );
     } else {
       return (
-        <div className="flex items-center text-red-600 dark:text-red-400">
-          <TrendingDown className="mr-1 h-4 w-4" />
-          <span className="sr-only md:not-sr-only">Outcome</span>
-        </div>
+        <Badge
+          variant="outline"
+          className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 flex items-center gap-1"
+        >
+          <TrendingDown className="h-3 w-3" />
+          <span>Outcome</span>
+        </Badge>
       );
     }
   };
@@ -140,15 +147,7 @@ export default function ExpenseList({
                 {new Date(expense.date).toLocaleDateString()}
               </p>
             </div>
-            <div
-              className={`px-2 py-1 rounded ${
-                expense.category === "income"
-                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-              }`}
-            >
-              {renderCategoryIcon(expense.category)}
-            </div>
+            <div>{renderCategoryBadge(expense.category)}</div>
           </div>
           <p
             className={`text-lg font-bold ${
@@ -183,11 +182,6 @@ export default function ExpenseList({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Expenses</CardTitle>
-        {user && (
-          <Link href="/add">
-            <Button size="sm">Add Expense</Button>
-          </Link>
-        )}
       </CardHeader>
       <CardContent className="p-4">
         <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -264,7 +258,7 @@ export default function ExpenseList({
                       </TableCell>
                       <TableCell>{expense.description}</TableCell>
                       <TableCell>
-                        {renderCategoryIcon(expense.category)}
+                        {renderCategoryBadge(expense.category)}
                       </TableCell>
                       <TableCell className="text-right">
                         <span

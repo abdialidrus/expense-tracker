@@ -14,7 +14,6 @@ import { useAuth } from "@/lib/auth-context";
 import { LogIn, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import BalanceSummary from "./balance-summary";
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -34,36 +33,26 @@ export function Header() {
             Expense Tracker
           </Link>
           <div className="flex items-center gap-4">
-            <BalanceSummary />
-
             {user ? (
-              <>
-                <Link href="/add">
-                  <Button>Add Expense</Button>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-2"
-                    >
-                      <span className="hidden sm:inline">{user.email}</span>
-                      <span className="sm:hidden">Account</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleSignOut}
-                      className="cursor-pointer"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <span className="hidden sm:inline">{user.email}</span>
+                    <span className="sm:hidden">Account</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link href="/login">
                 <Button variant="outline" className="flex items-center gap-2">
@@ -84,8 +73,6 @@ export function Header() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <BalanceSummary />
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -98,9 +85,6 @@ export function Header() {
                   <>
                     <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/add">Add Expense</Link>
-                    </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={handleSignOut}
                       className="cursor-pointer"
