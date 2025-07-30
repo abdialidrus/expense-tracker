@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
 import { Expense } from "@/types";
@@ -24,6 +25,7 @@ export default function ExpenseList({
 }: {
   onDataChange?: () => void;
 }) {
+  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,6 +91,11 @@ export default function ExpenseList({
   };
 
   const handleDelete = async (id: number) => {
+    if (!user) {
+      alert("You must be logged in to delete expenses");
+      return;
+    }
+
     if (confirm("Are you sure you want to delete this expense?")) {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
 
@@ -152,19 +159,21 @@ export default function ExpenseList({
           >
             {formatCurrency(expense.amount)}
           </p>
-          <div className="flex gap-2 mt-4">
-            <Button variant="outline" size="sm" asChild className="flex-1">
-              <Link href={`/edit/${expense.id}`}>Edit</Link>
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => handleDelete(expense.id)}
-              className="flex-1"
-            >
-              Delete
-            </Button>
-          </div>
+          {user && (
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" size="sm" asChild className="flex-1">
+                <Link href={`/edit/${expense.id}`}>Edit</Link>
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(expense.id)}
+                className="flex-1"
+              >
+                Delete
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     ));
@@ -172,8 +181,13 @@ export default function ExpenseList({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Expenses</CardTitle>
+        {user && (
+          <Link href="/add">
+            <Button size="sm">Add Expense</Button>
+          </Link>
+        )}
       </CardHeader>
       <CardContent className="p-4">
         <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -239,7 +253,7 @@ export default function ExpenseList({
                       Amount{" "}
                       {sortBy === "amount" && (sortOrder === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead>Actions</TableHead>
+                    {user && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -263,20 +277,22 @@ export default function ExpenseList({
                           {formatCurrency(expense.amount)}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" asChild>
-                            <Link href={`/edit/${expense.id}`}>Edit</Link>
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDelete(expense.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {user && (
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/edit/${expense.id}`}>Edit</Link>
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(expense.id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
