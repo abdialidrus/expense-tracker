@@ -10,11 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
 import { Expense } from "@/types";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { Pencil, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -159,18 +165,40 @@ export default function ExpenseList({
             {formatCurrency(expense.amount)}
           </p>
           {user && (
-            <div className="flex gap-2 mt-4">
-              <Button variant="outline" size="sm" asChild className="flex-1">
-                <Link href={`/edit/${expense.id}`}>Edit</Link>
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDelete(expense.id)}
-                className="flex-1"
-              >
-                Delete
-              </Button>
+            <div className="flex gap-2 mt-4 justify-end">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" asChild>
+                      <Link href={`/edit/${expense.id}`}>
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDelete(expense.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </CardContent>
@@ -247,7 +275,9 @@ export default function ExpenseList({
                       Amount{" "}
                       {sortBy === "amount" && (sortOrder === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    {user && <TableHead>Actions</TableHead>}
+                    {user && (
+                      <TableHead className="w-[100px]">Actions</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -273,17 +303,40 @@ export default function ExpenseList({
                       </TableCell>
                       {user && (
                         <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" asChild>
-                              <Link href={`/edit/${expense.id}`}>Edit</Link>
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDelete(expense.id)}
-                            >
-                              Delete
-                            </Button>
+                          <div className="flex gap-2 justify-center">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="outline" size="icon" asChild>
+                                    <Link href={`/edit/${expense.id}`}>
+                                      <Pencil className="h-4 w-4" />
+                                      <span className="sr-only">Edit</span>
+                                    </Link>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Edit</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    onClick={() => handleDelete(expense.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Delete</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Delete</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                       )}
