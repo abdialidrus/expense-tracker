@@ -40,12 +40,12 @@ export default function BalanceSummary() {
 
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-      {/* Income Card */}
+      {/* Credit Card (formerly Income) */}
       <div className="flex items-center bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
         <TrendingUp className="h-8 w-8 mr-4 text-green-600 dark:text-green-400" />
         <div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Total Income
+            Total Credit
           </div>
           {loading ? (
             <div className="h-6 w-28 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mt-1"></div>
@@ -57,12 +57,12 @@ export default function BalanceSummary() {
         </div>
       </div>
 
-      {/* Outcome Card */}
+      {/* Debit Card (formerly Outcome) */}
       <div className="flex items-center bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
         <TrendingDown className="h-8 w-8 mr-4 text-red-600 dark:text-red-400" />
         <div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Total Expenses
+            Total Debit
           </div>
           {loading ? (
             <div className="h-6 w-28 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mt-1"></div>

@@ -119,7 +119,7 @@ export default function ExpenseList({
           className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800 flex items-center gap-1"
         >
           <TrendingUp className="h-3 w-3" />
-          <span>Income</span>
+          <span>Credit</span>
         </Badge>
       );
     } else {
@@ -129,7 +129,7 @@ export default function ExpenseList({
           className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 flex items-center gap-1"
         >
           <TrendingDown className="h-3 w-3" />
-          <span>Outcome</span>
+          <span>Debit</span>
         </Badge>
       );
     }
@@ -198,8 +198,8 @@ export default function ExpenseList({
               className="border rounded p-1 dark:bg-gray-800 dark:border-gray-700"
             >
               <option value="all">All</option>
-              <option value="income">Income</option>
-              <option value="outcome">Outcome</option>
+              <option value="income">Credit</option>
+              <option value="outcome">Debit</option>
             </select>
           </div>
         </div>

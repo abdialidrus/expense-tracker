@@ -35,14 +35,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-// Fixed schema with proper Zod date validation
+// Updated schema with correct category names
 const formSchema = z.object({
-  // Fixed: Using z.date() without invalid arguments
   date: z.date().refine((date) => date instanceof Date, {
     message: "Please select a date",
   }),
   description: z.string().nonempty("Description is required"),
-  category: z.enum(["income", "outcome"]),
+  category: z.enum(["income", "outcome"]), // Keep DB values the same
   amount: z.number().min(0, "Amount must be positive"),
 });
 
@@ -149,6 +148,11 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
     return parseFloat(value.replace(/[^0-9.]/g, "")) || 0;
   };
 
+  // Map DB category values to display values
+  const getCategoryDisplayName = (category: string) => {
+    return category === "income" ? "Credit" : "Debit";
+  };
+
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
@@ -227,20 +231,24 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
                   >
                     <FormControl>
                       <SelectTrigger className="dark:bg-gray-800 dark:border-gray-700">
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Select a category">
+                          {field.value
+                            ? getCategoryDisplayName(field.value)
+                            : "Select a category"}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="income">
                         <div className="flex items-center">
                           <TrendingUp className="mr-2 h-4 w-4 text-green-600" />
-                          <span>Income</span>
+                          <span>Credit</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="outcome">
                         <div className="flex items-center">
                           <TrendingDown className="mr-2 h-4 w-4 text-red-600" />
-                          <span>Outcome</span>
+                          <span>Debit</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
