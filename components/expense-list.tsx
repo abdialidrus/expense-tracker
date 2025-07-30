@@ -14,8 +14,10 @@ import { formatCurrency } from "@/lib/utils";
 import { Expense } from "@/types";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+
+type CategoryFilterType = "all" | "income" | "outcome";
 
 export default function ExpenseList({
   onDataChange,
@@ -28,17 +30,13 @@ export default function ExpenseList({
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [categoryFilter, setCategoryFilter] = useState<
-    "all" | "income" | "outcome"
-  >("all");
+  const [categoryFilter, setCategoryFilter] =
+    useState<CategoryFilterType>("all");
 
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [currentPage, sortBy, sortOrder, categoryFilter]);
-
-  const fetchExpenses = async () => {
+  // Create fetchExpenses as a useCallback to use it in dependencies
+  const fetchExpenses = useCallback(async () => {
     setLoading(true);
     try {
       // Build the query
@@ -73,7 +71,11 @@ export default function ExpenseList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, sortBy, sortOrder, categoryFilter, onDataChange]);
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -182,7 +184,9 @@ export default function ExpenseList({
             <select
               id="category-filter"
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value as any)}
+              onChange={(e) =>
+                setCategoryFilter(e.target.value as CategoryFilterType)
+              }
               className="border rounded p-1 dark:bg-gray-800 dark:border-gray-700"
             >
               <option value="all">All</option>

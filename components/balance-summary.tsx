@@ -5,10 +5,6 @@ import { formatCurrency } from "@/lib/utils";
 import { Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type SummaryData = {
-  net_amount: number;
-};
-
 export default function BalanceSummary() {
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);

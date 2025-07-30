@@ -22,7 +22,7 @@ import { supabase } from "@/lib/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -50,14 +50,10 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
     },
   });
 
-  // If editing, fetch the expense data
-  useEffect(() => {
-    if (isEditing) {
-      fetchExpense();
-    }
-  }, [isEditing]);
+  // Create fetchExpense as a useCallback to use it in dependencies
+  const fetchExpense = useCallback(async () => {
+    if (!expenseId) return;
 
-  const fetchExpense = async () => {
     try {
       const { data, error } = await supabase
         .from("expenses")
@@ -76,7 +72,14 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
     } catch (error) {
       console.error("Error fetching expense:", error);
     }
-  };
+  }, [expenseId, form]);
+
+  // If editing, fetch the expense data
+  useEffect(() => {
+    if (isEditing) {
+      fetchExpense();
+    }
+  }, [isEditing, fetchExpense]);
 
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
@@ -108,7 +111,7 @@ export default function ExpenseForm({ expenseId }: { expenseId?: number }) {
   // Convert string to number when amount input changes
   const handleAmountChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (...event: any[]) => void
+    onChange: (value: number) => void
   ) => {
     const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
     onChange(value);
